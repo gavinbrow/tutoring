@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SubstitutionScheme, SynthesisScheme } from "@/components/reaction-schemes";
@@ -27,7 +26,7 @@ export default function Examples() {
           <div className="hero-copy">
             <p className="lead">Bring the lecture that lost you or the homework that isn’t working out. We’ll go through it with you, then show you how to approach the next one. Here is how that looks on a few problems, one from each course.</p>
             <div className="actions">
-              <Link className="button" href="/#request">Request a session</Link>
+              <a className="button" href="/#request">Request a session</a>
               <a className="text-link" href="#examples">More examples below</a>
             </div>
             <p className="taught-by">Taught by {tutors.map((person, i) => <span key={person.key}>{i > 0 && " and "}<strong>{person.name}</strong></span>)}, chemistry PhD students at the University of Arkansas.</p>
@@ -62,7 +61,7 @@ export default function Examples() {
               <div>
                 <h3>{highSchool.title}</h3>
                 <p>A stoichiometry problem: turning a mass of fuel into a mass of product.</p>
-                <Link className="text-link" href={`/?course=${highSchool.slug}#request`}>Request help with high school or AP</Link>
+                <a className="text-link" href={`/?course=${highSchool.slug}#request`}>Request help with high school or AP</a>
               </div>
               <div className="sheet">
                 <p className="sheet-head"><span>Sample problem</span><span>Stoichiometry</span></p>
@@ -90,7 +89,7 @@ export default function Examples() {
               <div>
                 <h3>{general.title}</h3>
                 <p>A weak-acid equilibrium: setting up the table, then checking the shortcut.</p>
-                <Link className="text-link" href={`/?course=${general.slug}#request`}>Request help with general chemistry</Link>
+                <a className="text-link" href={`/?course=${general.slug}#request`}>Request help with general chemistry</a>
               </div>
               <div className="sheet">
                 <p className="sheet-head"><span>Sample problem</span><span>Weak acids</span></p>
@@ -127,7 +126,7 @@ export default function Examples() {
               <div>
                 <h3>{organic.title}</h3>
                 <p>A short synthesis, planned backwards from the product.</p>
-                <Link className="text-link" href={`/?course=${organic.slug}#request`}>Request help with organic chemistry</Link>
+                <a className="text-link" href={`/?course=${organic.slug}#request`}>Request help with organic chemistry</a>
               </div>
               <div className="sheet">
                 <p className="sheet-head"><span>Sample problem</span><span>Synthesis</span></p>
@@ -148,8 +147,8 @@ export default function Examples() {
           <div className="section-body">
             <p className="lead">Tell us your course and the topics you’re working on. Your tutor will reply to confirm rates, timing and format.</p>
             <div className="actions">
-              <Link className="button" href="/#request">Request a session</Link>
-              <Link className="text-link" href="/">Back to the home page</Link>
+              <a className="button" href="/#request">Request a session</a>
+              <a className="text-link" href="/">Back to the home page</a>
             </div>
           </div>
         </div>

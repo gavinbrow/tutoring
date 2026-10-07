@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { flushSync } from "react-dom";
-import Link from "next/link";
 import { Copy, Mail } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { company, courseOptions, subjects, tutors, tutorOptions, faqs, createEmailDraft, type Course, type TutorKey } from "@/lib/tutoring";
+import { company, courseOptions, subjects, tutors, tutorOptions, faqs, createEmailDraft, courseFromSlug, tutorFromKey, type Course, type TutorKey } from "@/lib/tutoring";
 
 const glance = [
   ["Tutors", tutors.map(person => person.name).join(" and ")],
@@ -29,9 +28,9 @@ const bring = [
   "Before an exam, your course outline or review guide",
 ];
 
-export function HomePage({ initialCourse, initialTutor }: { initialCourse: Course; initialTutor: TutorKey }) {
-  const [course, setCourse] = useState<Course>(initialCourse);
-  const [tutor, setTutor] = useState<TutorKey>(initialTutor);
+export function HomePage() {
+  const [course, setCourse] = useState<Course>("Not sure yet");
+  const [tutor, setTutor] = useState<TutorKey>("either");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [goals, setGoals] = useState("");
@@ -49,6 +48,14 @@ export function HomePage({ initialCourse, initialTutor }: { initialCourse: Cours
     document.getElementById("request-name")?.focus({ preventScroll: true });
   };
 
+  // The page is prerendered, so read ?course= and ?tutor= preselection in the
+  // browser after hydration; reading it during render would mismatch the HTML.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCourse(courseFromSlug(params.get("course")));
+    setTutor(tutorFromKey(params.get("tutor")));
+  }, []);
   useEffect(() => { if (draft) draftHeading.current?.focus(); }, [draft]);
   useEffect(() => {
     type Tool = { name: string; title: string; description: string; inputSchema: object; annotations: object; execute: (input: unknown) => object };
@@ -97,8 +104,8 @@ export function HomePage({ initialCourse, initialTutor }: { initialCourse: Cours
           <div className="hero-copy">
             <p className="lead">We’re chemistry PhD students at the University of Arkansas, and we tutor <mark>one-on-one</mark>, from high school chemistry through organic. Bring the lecture that lost you or the homework that isn’t working out, and we’ll go through it with you.</p>
             <div className="actions">
-              <Link className="button" href="/#request">Request a session</Link>
-              <Link className="text-link" href="/#courses">See what we teach</Link>
+              <a className="button" href="/#request">Request a session</a>
+              <a className="text-link" href="/#courses">See what we teach</a>
             </div>
           </div>
           <div className="sheet hero-aside">
@@ -127,7 +134,7 @@ export function HomePage({ initialCourse, initialTutor }: { initialCourse: Cours
                 </div>
               </article>
             ))}
-            <p className="examples-pointer">Want to see how we explain things? <Link className="inline-link" href="/examples">Look at a few worked examples</Link>.</p>
+            <p className="examples-pointer">Want to see how we explain things? <a className="inline-link" href="/examples">Look at a few worked examples</a>.</p>
           </div>
         </div>
       </section>

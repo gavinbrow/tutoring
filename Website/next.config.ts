@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Cloudflare Pages serves static files only, so prerender every page to HTML.
+  output: "export",
 };
 
 export default nextConfig;

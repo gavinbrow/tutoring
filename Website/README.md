@@ -4,7 +4,7 @@ A responsive React 19 and TypeScript site for Gavin Brown and Felix Campbell. â€
 
 ## Run locally
 
-Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the local address printed by the development server. `npm run build` creates the deployable Cloudflare Workers site. `npm run lint` and `npx tsc --noEmit` check the source.
+Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the local address printed by the development server. `npm run build` prerenders both pages to static HTML in `dist/client` (`output: "export"` in `next.config.ts`), which is what Cloudflare Pages publishes. `npm run lint` and `npx tsc --noEmit` check the source.
 
 ## Site plan and implemented visitor journey
 
@@ -16,6 +16,10 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 6. Offer the request form at the foot of the home page. Course and tutor links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
 7. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.
 8. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
+
+## Deploying to Cloudflare Pages
+
+Pages settings: root directory `Website`, build command `npm run build`, build output directory `dist/client`. The pages are static, so `?course=` and `?tutor=` preselection is read in the browser. Links are plain `<a>` elements because vinextâ€™s `<Link>` client navigation throws in the pinned beta.
 
 ## Editing business details
 
