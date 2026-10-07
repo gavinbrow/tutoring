@@ -1,6 +1,6 @@
 # Good Chemistry — chemistry tutoring
 
-A responsive React 19 and TypeScript site for Gavin Brown and Felix Campbell. “Good Chemistry” is an explicitly temporary company name. This project uses the Vinext React framework and Vite, with accessible Radix/Shadcn form, dialog, and accordion components.
+A responsive React 19 and TypeScript site for Gavin Brown and Felix Campbell. “Good Chemistry” is an explicitly temporary company name. This project uses the Vinext React framework and Vite. The Radix/Shadcn components remain vendored in `components/ui`, but the pages are now plain HTML styled in `app/globals.css` and no longer use them.
 
 ## Run locally
 
@@ -8,19 +8,22 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 
 ## Site plan and implemented visitor journey
 
-1. Introduce personal tutoring for high school, AP, and college chemistry.
-2. Explain the three subject areas and the topics students can bring.
-3. Show the approach: questions, conceptual connections, then guided practice.
+1. Say who the tutors are and what they teach, with an at-a-glance summary beside the introduction.
+2. List the three courses and the topics students can bring.
+3. Show how a session goes (questions, connecting the ideas, guided practice) and what to bring.
 4. Introduce both tutors using the academic information supplied by the owner.
 5. Answer practical questions without inventing rates, credentials, testimonials, or availability.
-6. Open an accessible session planner, optionally preselecting course and tutor.
+6. Offer the request form at the foot of the home page. Course and tutor links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
 7. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.
+8. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
 
 ## Editing business details
 
-- `lib/tutoring.ts`: placeholder company name, tutor contact details, bios, course descriptions, FAQ, and email draft generation.
+- `lib/tutoring.ts`: placeholder company name, tutor contact details, course descriptions, FAQ, and email draft generation.
 - `app/layout.tsx`: browser title, search description, favicon.
-- `app/page.tsx`: page structure and session planner.
+- `app/page.tsx` and `components/home-page.tsx`: home page structure and the request form.
+- `app/examples/page.tsx` and `components/reaction-schemes.tsx`: the worked examples and their hand-placed structure drawings. Check the chemistry whenever a problem is changed.
+- `components/site-header.tsx` and `components/site-footer.tsx`: navigation and contact details shared by both pages.
 - `app/globals.css`: palette, typography, responsive layout, and components.
 - `public/favicon.svg`: original simple brand icon.
 
@@ -28,11 +31,11 @@ The two contact addresses supplied by the owner are `glb001@uark.edu` and `fcamp
 
 ## Design
 
-Violet, deep ink, and tangerine with an editorial serif and readable sans serif. Custom molecular artwork, real tutor names, and typographic initials instead of fabricated tutor photographs. Light theme intentionally fixed; reduced-motion preferences supported. The site includes mobile navigation, a keyboard-accessible modal and selects, labeled fields, clear draft status, fallback copy, and a skip link.
+A printed problem set: white paper, black ink, one ballpoint blue (`--pen`) for the tutor’s working, and highlighter yellow (`--highlight`) for the key idea and the request form. Libre Franklin carries the site’s own voice; STIX Two Text is used only inside the problems and the “pen” annotations. Section titles sit in a margin column with ruled lines between sections rather than cards. Real tutor names and no fabricated tutor photographs. Light theme intentionally fixed; reduced-motion preferences supported. The site includes mobile navigation, native radio buttons and labeled fields, clear draft status, fallback copy, and a skip link.
 
-## Original hero asset
+## Retired hero asset
 
-Asset: `public/images/molecular-hero.webp`. Created once with the built-in ImageGen tool, then converted to WebP for web delivery. The artwork is conceptual and is not intended as an exact chemical structure.
+Asset: `public/images/molecular-hero.webp`. No page references it since the redesign; it is kept only for provenance and can be deleted. Created once with the built-in ImageGen tool, then converted to WebP for web delivery. The artwork is conceptual and is not intended as an exact chemical structure.
 
 Exact generation prompt:
 
@@ -40,8 +43,8 @@ Exact generation prompt:
 
 ## Optional browser agent support
 
-When supported, `start_tutoring_request` opens the same visible planner after validating its course and tutor options. It only stages the request and cannot send email. Browsers without WebMCP use the complete ordinary interface.
+When supported, `start_tutoring_request` scrolls to the same visible request form after validating its course and tutor options. It only stages the request and cannot send email. Browsers without WebMCP use the complete ordinary interface.
 
 ## Verification
 
-TypeScript and lint checked. Browser checks cover course preselection, required-field validation, email draft content and recipient routing, webmail copy, mobile navigation, FAQ expansion, image loading, and page width. The browser agent tool was exercised with valid and invalid inputs; invalid courses fail without changing the selected course. No test inquiry was sent.
+After the redesign: TypeScript, lint, and a production build pass. Browser checks at 1440 px and 390 px cover both pages, course and tutor preselection (buttons and `?course=` links), email draft content and recipient routing, mobile navigation, and page width. The webmail copy button and the browser agent tool were not re-exercised after the redesign. No test inquiry was sent.
