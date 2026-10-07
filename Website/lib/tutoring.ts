@@ -1,5 +1,7 @@
 /** Business details are kept here so the placeholder brand is easy to replace. */
 export const company = { name: "Good Chemistry", isPlaceholderName: true };
+/** The production address. Change it here (and in public/robots.txt and public/sitemap.xml) when a custom domain is added. */
+export const siteUrl = "https://tutoring-9f8.pages.dev";
 export const subjects = [
   { slug: "high-school", name: "High School & AP Chemistry", title: "High school & AP Chemistry", label: "High school & AP", description: "Make sense of the fundamentals and build confidence for class, homework and the AP exam.", topics: "atoms and bonding, stoichiometry, acids and bases" },
   { slug: "general", name: "General Chemistry", title: "General Chemistry I & II", label: "General Chemistry", description: "Turn equations into understanding. We work through the ideas and the calculations behind your college course.", topics: "equilibrium, thermodynamics, kinetics" },

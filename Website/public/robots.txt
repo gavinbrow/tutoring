@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tutoring-9f8.pages.dev/sitemap.xml

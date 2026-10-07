@@ -5,9 +5,21 @@ import { SiteFooter } from "@/components/site-footer";
 import { SubstitutionScheme, SynthesisScheme } from "@/components/reaction-schemes";
 import { company, subjects, tutors } from "@/lib/tutoring";
 
+const description = "Worked chemistry problems from high school, general and organic chemistry (stoichiometry, weak acids, SN2 stereochemistry, synthesis), solved the way we go through them in a tutoring session.";
+
 export const metadata: Metadata = {
-  title: `Worked examples | ${company.name}`,
-  description: "A few chemistry problems from high school, general and organic chemistry, worked the way we go through them in a tutoring session.",
+  title: `Worked Chemistry Examples | ${company.name}`,
+  description,
+  alternates: { canonical: "/examples" },
+  // A page's openGraph replaces the layout's rather than merging, so repeat the image.
+  openGraph: {
+    type: "website",
+    siteName: company.name,
+    url: "/examples",
+    title: `Worked Chemistry Examples | ${company.name}`,
+    description,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: `${company.name}: chemistry tutoring with Gavin Brown and Felix Campbell` }],
+  },
 };
 
 const [highSchool, general, organic] = subjects;

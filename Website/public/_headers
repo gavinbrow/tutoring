@@ -1,0 +1,7 @@
+# Cache content-hashed assets immutably
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Keep preview and branch deployments (<id>.tutoring-9f8.pages.dev) out of search results
+https://:version.tutoring-9f8.pages.dev/*
+  X-Robots-Tag: noindex

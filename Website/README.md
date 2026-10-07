@@ -21,6 +21,13 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 
 Pages settings: root directory `Website`, build command `npm run build`, build output directory `dist/client`. The pages are static, so `?course=` and `?tutor=` preselection is read in the browser. Links are plain `<a>` elements because vinext’s `<Link>` client navigation throws in the pinned beta.
 
+## Search engines
+
+- The production address lives in `siteUrl` in `lib/tutoring.ts`, and again in `public/robots.txt` and `public/sitemap.xml`. Update all three if the site moves to a custom domain.
+- Each page sets its title, description, canonical URL and Open Graph tags through `metadata`. The share image is `public/og.png` (1200×630).
+- The home page carries schema.org `EducationalOrganization` data for the tutors.
+- `public/_headers` sends `X-Robots-Tag: noindex` on preview and branch deployments (`<id>.tutoring-9f8.pages.dev`), so only the production address is indexed.
+
 ## Editing business details
 
 - `lib/tutoring.ts`: placeholder company name, tutor contact details, course descriptions, FAQ, and email draft generation.
