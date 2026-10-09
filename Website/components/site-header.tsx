@@ -5,8 +5,8 @@ import { Menu, X } from "lucide-react";
 import { company } from "@/lib/tutoring";
 
 const links = [
-  { href: "/#courses", label: "What we teach" },
   { href: "/#tutors", label: "Who we are" },
+  { href: "/#courses", label: "What we teach" },
   { href: "/examples", label: "Worked examples" },
   { href: "/#questions", label: "Questions" },
 ];

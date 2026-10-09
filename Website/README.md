@@ -9,8 +9,8 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 ## Site plan and implemented visitor journey
 
 1. Say who the tutors are and what they teach, with an at-a-glance summary beside the introduction.
-2. List the three courses and the topics students can bring.
-3. Introduce both tutors with a photo and the academic information supplied by the owner.
+2. Introduce both tutors with a photo and the academic information supplied by the owner.
+3. List the three courses and the topics students can bring.
 4. Answer practical questions without inventing rates, credentials, testimonials, or availability.
 5. Offer the request form at the foot of the home page. Course links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
 6. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.

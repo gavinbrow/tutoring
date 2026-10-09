@@ -104,6 +104,27 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="shell" id="tutors" aria-labelledby="tutors-heading">
+        <div className="section-inner">
+          <div className="section-head"><h2 id="tutors-heading">Who we are</h2></div>
+          <div className="section-body">
+            <p className="lead tutors-intro">We’re both chemistry PhD students at the University of Arkansas, researching polymer and organic chemistry in Dr. Michael McGraw’s lab. We spend our days asking chemistry questions, so bring yours.</p>
+            <div className="tutor-grid">
+              {tutors.map(person => (
+                <article className="tutor" key={person.key}>
+                  {person.photo && <img className="tutor-photo" src={person.photo} alt={`${person.name}, chemistry tutor`} loading="lazy" />}
+                  <h3>{person.name}</h3>
+                  <p className="note">PhD student in chemistry, University of Arkansas</p>
+                  <div className="tutor-links">
+                    <a className="text-link" href={`mailto:${person.email}`}>{person.email}</a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="shell" id="courses" aria-labelledby="courses-heading">
         <div className="section-inner">
           <div className="section-head">
@@ -122,27 +143,6 @@ export function HomePage() {
               </article>
             ))}
             <p className="examples-pointer">Want to see how we explain things? <a className="inline-link" href="/examples">Look at a few worked examples</a>.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="shell" id="tutors" aria-labelledby="tutors-heading">
-        <div className="section-inner">
-          <div className="section-head"><h2 id="tutors-heading">Who we are</h2></div>
-          <div className="section-body">
-            <p className="lead tutors-intro">We’re both chemistry PhD students at the University of Arkansas, researching polymer and organic chemistry in Dr. Michael McGraw’s lab. We spend our days asking chemistry questions, so bring yours.</p>
-            <div className="tutor-grid">
-              {tutors.map(person => (
-                <article className="tutor" key={person.key}>
-                  {person.photo && <img className="tutor-photo" src={person.photo} alt={`${person.name}, chemistry tutor`} loading="lazy" />}
-                  <h3>{person.name}</h3>
-                  <p className="note">PhD student in chemistry, University of Arkansas</p>
-                  <div className="tutor-links">
-                    <a className="text-link" href={`mailto:${person.email}`}>{person.email}</a>
-                  </div>
-                </article>
-              ))}
-            </div>
           </div>
         </div>
       </section>
