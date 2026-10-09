@@ -6,7 +6,6 @@ import { company } from "@/lib/tutoring";
 
 const links = [
   { href: "/#courses", label: "What we teach" },
-  { href: "/#sessions", label: "How a session goes" },
   { href: "/#tutors", label: "Who we are" },
   { href: "/examples", label: "Worked examples" },
   { href: "/#questions", label: "Questions" },

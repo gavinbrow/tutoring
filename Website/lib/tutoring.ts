@@ -1,5 +1,5 @@
-/** Business details are kept here so the placeholder brand is easy to replace. */
-export const company = { name: "Good Chemistry", isPlaceholderName: true };
+/** Business details are kept here so the brand is easy to change. */
+export const company = { name: "Brown Campbell Tutoring" };
 /** The production address. Change it here (and in public/robots.txt and public/sitemap.xml) when a custom domain is added. */
 export const siteUrl = "https://tutoring-9f8.pages.dev";
 export const subjects = [
@@ -10,8 +10,8 @@ export const subjects = [
 export type Course = typeof subjects[number]["name"] | "Not sure yet";
 export type TutorKey = "either" | "gavin" | "felix";
 export const tutors = [
-  { key: "gavin" as const, name: "Gavin Brown", firstName: "Gavin", email: "glb001@uark.edu", tagline: "Work with Gavin to explore the concepts behind your course, one question at a time." },
-  { key: "felix" as const, name: "Felix Campbell", firstName: "Felix", email: "fcampbell@uark.edu", tagline: "Work with Felix to unpack tricky topics and connect the ideas in your chemistry course." },
+  { key: "gavin" as const, name: "Gavin Brown", firstName: "Gavin", email: "glb001@uark.edu", photo: "/images/gavin-brown.jpg" as string | null },
+  { key: "felix" as const, name: "Felix Campbell", firstName: "Felix", email: "fcampbell@uark.edu", photo: "/images/felix-campbell.jpg" as string | null },
 ];
 export const courseOptions: Course[] = [...subjects.map(subject => subject.name), "Not sure yet"];
 export const tutorOptions: TutorKey[] = ["either", ...tutors.map(tutor => tutor.key)];

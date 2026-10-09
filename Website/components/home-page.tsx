@@ -15,19 +15,6 @@ const glance = [
   ["To get started", "Send a request and your tutor confirms rates and timing with you"],
 ];
 
-const steps = [
-  { title: "Start with your questions.", body: "A confusing lecture, a tough problem set, an exam coming up. We begin where things stop making sense." },
-  { title: "Connect the ideas.", body: "We break down the reasoning, build from what you already know, and work through examples at your pace." },
-  { title: "Try the next one yourself.", body: "You work a problem and talk through your thinking, and you leave with a clear idea of what to practice next." },
-];
-
-const bring = [
-  "Your lecture notes",
-  "The practice problems you’re working on",
-  "A few questions about where you’re getting stuck",
-  "Before an exam, your course outline or review guide",
-];
-
 export function HomePage() {
   const [course, setCourse] = useState<Course>("Not sure yet");
   const [tutor, setTutor] = useState<TutorKey>("either");
@@ -99,7 +86,7 @@ export function HomePage() {
     <SiteHeader />
     <main id="main">
       <section className="hero shell" aria-labelledby="hero-heading">
-        <h1 id="hero-heading">{company.name} Tutoring</h1>
+        <h1 id="hero-heading">{company.name}</h1>
         <div className="hero-body">
           <div className="hero-copy">
             <p className="lead">We’re chemistry PhD students at the University of Arkansas, and we tutor <mark>one-on-one</mark>, from high school chemistry through organic. Bring the lecture that lost you or the homework that isn’t working out, and we’ll go through it with you.</p>
@@ -109,7 +96,7 @@ export function HomePage() {
             </div>
           </div>
           <div className="sheet hero-aside">
-            <p className="sheet-head"><span>At a glance</span><span>{company.name} tutoring</span></p>
+            <p className="sheet-head"><span>At a glance</span><span>{company.name}</span></p>
             <dl className="glance">
               {glance.map(([label, value]) => <div key={label}><dt>{label}</dt><dd className="penned">{value}</dd></div>)}
             </dl>
@@ -139,26 +126,6 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="shell" id="sessions" aria-labelledby="sessions-heading">
-        <div className="section-inner">
-          <div className="section-head"><h2 id="sessions-heading">How a session goes</h2></div>
-          <div className="section-body session-body">
-            <ol className="steps">
-              {steps.map((step, i) => (
-                <li key={step.title}>
-                  <span className="step-letter" aria-hidden="true">({"abc"[i]})</span>
-                  <div><h3>{step.title}</h3><p>{step.body}</p></div>
-                </li>
-              ))}
-            </ol>
-            <aside className="bring" aria-labelledby="bring-heading">
-              <h3 id="bring-heading">What to bring</h3>
-              <ul>{bring.map(item => <li key={item}>{item}</li>)}</ul>
-            </aside>
-          </div>
-        </div>
-      </section>
-
       <section className="shell" id="tutors" aria-labelledby="tutors-heading">
         <div className="section-inner">
           <div className="section-head"><h2 id="tutors-heading">Who we are</h2></div>
@@ -167,11 +134,10 @@ export function HomePage() {
             <div className="tutor-grid">
               {tutors.map(person => (
                 <article className="tutor" key={person.key}>
+                  {person.photo && <img className="tutor-photo" src={person.photo} alt={`${person.name}, chemistry tutor`} loading="lazy" />}
                   <h3>{person.name}</h3>
                   <p className="note">PhD student in chemistry, University of Arkansas</p>
-                  <p>{person.tagline}</p>
                   <div className="tutor-links">
-                    <button className="text-link" onClick={() => startRequest({ tutor: person.key })}>Request a session with {person.firstName}</button>
                     <a className="text-link" href={`mailto:${person.email}`}>{person.email}</a>
                   </div>
                 </article>

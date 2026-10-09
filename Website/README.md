@@ -1,6 +1,6 @@
-# Good Chemistry — chemistry tutoring
+# Brown Campbell Tutoring — chemistry tutoring
 
-A responsive React 19 and TypeScript site for Gavin Brown and Felix Campbell. “Good Chemistry” is an explicitly temporary company name. This project uses the Vinext React framework and Vite. The Radix/Shadcn components remain vendored in `components/ui`, but the pages are now plain HTML styled in `app/globals.css` and no longer use them.
+A responsive React 19 and TypeScript site for Gavin Brown and Felix Campbell. This project uses the Vinext React framework and Vite. The Radix/Shadcn components remain vendored in `components/ui`, but the pages are now plain HTML styled in `app/globals.css` and no longer use them.
 
 ## Run locally
 
@@ -10,12 +10,11 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 
 1. Say who the tutors are and what they teach, with an at-a-glance summary beside the introduction.
 2. List the three courses and the topics students can bring.
-3. Show how a session goes (questions, connecting the ideas, guided practice) and what to bring.
-4. Introduce both tutors using the academic information supplied by the owner.
-5. Answer practical questions without inventing rates, credentials, testimonials, or availability.
-6. Offer the request form at the foot of the home page. Course and tutor links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
-7. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.
-8. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
+3. Introduce both tutors with a photo and the academic information supplied by the owner.
+4. Answer practical questions without inventing rates, credentials, testimonials, or availability.
+5. Offer the request form at the foot of the home page. Course links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
+6. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.
+7. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
 
 ## Deploying to Cloudflare Pages
 
