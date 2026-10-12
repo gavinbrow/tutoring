@@ -8,6 +8,7 @@ const links = [
   { href: "/#tutors", label: "Who we are" },
   { href: "/#courses", label: "What we teach" },
   { href: "/examples", label: "Worked examples" },
+  { href: "/game", label: "Study game" },
   { href: "/#questions", label: "Questions" },
 ];
 

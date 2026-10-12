@@ -5,3 +5,7 @@
 # Keep preview and branch deployments (<id>.tutoring-9f8.pages.dev) out of search results
 https://:version.tutoring-9f8.pages.dev/*
   X-Robots-Tag: noindex
+
+# The study game is embedded at /game; keep the raw file itself out of search results
+/games/*
+  X-Robots-Tag: noindex

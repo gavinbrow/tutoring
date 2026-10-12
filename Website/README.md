@@ -15,6 +15,7 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 5. Offer the request form at the foot of the home page. Course links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
 6. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.
 7. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
+8. Offer Felix’s substitution and elimination study game at `/game`. The game is one self-contained file, `public/games/organic-exam-two.html`, embedded in the page; replace that file to update the game.
 
 ## Deploying to Cloudflare Pages
 

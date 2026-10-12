@@ -84,6 +84,13 @@ mark{background:var(--highlight);color:inherit;margin-inline:-4px;padding:2px 4p
 .examples-pointer{padding-top:24px;border-top:1px solid var(--ink)}
 .examples-pointer .inline-link{font-weight:600}
 
+.game{padding-block:clamp(28px,4vw,48px) clamp(40px,6vw,72px)}
+.game-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;margin-bottom:20px}
+.game-head h1{font-size:clamp(30px,4vw,48px);font-weight:800;line-height:1.05;letter-spacing:-.03em}
+.game-head .note{max-width:640px;margin-top:10px}
+.game-frame{display:block;width:100%;height:max(560px,calc(100vh - 150px));border:1.5px solid var(--ink);background:#f7f8f4}
+.game-foot{margin-top:14px}
+
 .tutors-intro{max-width:720px}
 .tutor-grid{display:flex;flex-wrap:wrap;gap:36px 48px;margin-top:40px}
 .tutor{flex:1 1 300px;min-width:0;max-width:440px;text-align:center;padding-top:18px;border-top:1px solid var(--ink)}
@@ -185,7 +192,7 @@ mark{background:var(--highlight);color:inherit;margin-inline:-4px;padding:2px 4p
 .footer-fine{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule);font-size:14px;color:var(--muted-foreground)}
 
 @media(max-width:1360px){.brand-sub{display:none}}
-@media(max-width:1120px){.site-nav{display:none}.site-nav[data-open=true]{display:flex;position:absolute;top:100%;left:0;right:0;z-index:20;flex-direction:column;align-items:stretch;gap:0;padding:8px 18px 12px;border:2px solid var(--ink);border-top:0;background:var(--paper);font-size:17px}.site-nav[data-open=true] a{min-height:48px}.header-actions{margin-left:auto}.menu-toggle{display:grid}}
+@media(max-width:1200px){.site-nav{display:none}.site-nav[data-open=true]{display:flex;position:absolute;top:100%;left:0;right:0;z-index:20;flex-direction:column;align-items:stretch;gap:0;padding:8px 18px 12px;border:2px solid var(--ink);border-top:0;background:var(--paper);font-size:17px}.site-nav[data-open=true] a{min-height:48px}.header-actions{margin-left:auto}.menu-toggle{display:grid}}
 @media(max-width:700px){.section-head{flex-basis:100%}.section-inner{gap:24px}.hero:not(.hero-examples) .lead,.lead{font-size:19px}.tutor h3{font-size:30px}.glance dt{flex-basis:100%}.sheet-head{padding-inline:16px}.glance{padding-inline:16px}.sheet-body,.hero-aside .sheet-body{padding:18px 16px}.ice th,.ice td{padding-inline:8px}}
 @media(max-width:480px){.choice>div{flex-direction:column}}
 @media(max-width:700px){.header-actions .button{display:none}}
