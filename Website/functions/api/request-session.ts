@@ -1,16 +1,18 @@
 import { company, courseOptions, requestInbox, tutors, tutorOptions } from "../../lib/tutoring";
 
 /**
- * Cloudflare Pages Function behind the "Request a session" form. It emails the
- * request to `requestInbox` through MailerSend, with the visitor as reply-to.
- * Both values come from the Pages project's Variables and Secrets, never the
- * repository:
+ * Cloudflare Pages Function behind the "Request a session" form. It checks the
+ * visitor passed Cloudflare Turnstile, then emails the request to
+ * `requestInbox` through MailerSend, with the visitor as reply-to. These come
+ * from the Pages project's Variables and Secrets, never the repository:
  *   MAILERSEND_API_KEY     MailerSend API token (add it as a secret)
  *   MAILERSEND_FROM_EMAIL  sender address on a domain verified in MailerSend
+ *   TURNSTILE_SECRET_KEY   Turnstile widget secret key (add it as a secret)
  */
 interface Env {
   MAILERSEND_API_KEY?: string;
   MAILERSEND_FROM_EMAIL?: string;
+  TURNSTILE_SECRET_KEY?: string;
 }
 
 const reply = (status: number, body: object) => Response.json(body, { status });
@@ -22,11 +24,29 @@ function field(value: unknown, max: number) {
   return text && text.length <= max ? text : null;
 }
 
+/** Asks Turnstile whether the widget's one-time token came from a person. */
+async function passedTurnstile(token: unknown, secret: string, ip: string | null) {
+  if (typeof token !== "string" || !token || token.length > 2048) return false;
+  const body = new FormData();
+  body.append("secret", secret);
+  body.append("response", token);
+  if (ip) body.append("remoteip", ip);
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body });
+    const outcome = await response.json() as { success?: boolean };
+    return outcome.success === true;
+  } catch {
+    return false;
+  }
+}
+
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   let data: unknown;
   try { data = await request.json(); } catch { data = null; }
   if (!data || typeof data !== "object") return reply(400, { error: "Send the request as JSON." });
   const input = data as Record<string, unknown>;
+  // People never see the "website" field; bots that fill in every field do. Let them think it worked.
+  if (input.website) return reply(200, { ok: true });
 
   // The form enforces the same limits, so only hand-made requests fail here.
   const name = field(input.name, 100)?.replace(/\s+/g, " ");
@@ -36,6 +56,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const tutor = tutorOptions.find(option => option === input.tutor);
   if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !goals || !course || !tutor) {
     return reply(400, { error: "Fill in every field with a valid email address." });
+  }
+
+  // Until the Turnstile keys are set, the honeypot above is the only bot check.
+  if (!env.TURNSTILE_SECRET_KEY) {
+    console.warn("TURNSTILE_SECRET_KEY is not set, so requests are not checked by Turnstile.");
+  } else if (!await passedTurnstile(input.turnstileToken, env.TURNSTILE_SECRET_KEY, request.headers.get("CF-Connecting-IP"))) {
+    return reply(403, { error: "The spam check failed. Try again." });
   }
 
   if (!env.MAILERSEND_API_KEY || !env.MAILERSEND_FROM_EMAIL) {

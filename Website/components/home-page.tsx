@@ -6,6 +6,28 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { company, courseOptions, subjects, tutors, tutorOptions, faqs, createEmailDraft, courseFromSlug, tutorFromKey, type Course, type TutorKey } from "@/lib/tutoring";
 
+/** Cloudflare Turnstile's public site key, inlined at build time. Without it the form shows no spam check. */
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+type Turnstile = {
+  render: (container: HTMLElement, options: { sitekey: string; theme: "light"; size: "flexible" }) => string;
+  reset: (widget: string) => void;
+  remove: (widget: string) => void;
+};
+let turnstileScript: Promise<Turnstile> | undefined;
+function loadTurnstile() {
+  turnstileScript ??= new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.onload = () => {
+      const api = (window as Window & { turnstile?: Turnstile }).turnstile;
+      if (api) resolve(api); else reject(new Error("Turnstile did not load."));
+    };
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return turnstileScript;
+}
+
 const glance = [
   ["Tutors", tutors.map(person => person.name).join(" and ")],
   ["Who we are", "Chemistry PhD students at the University of Arkansas"],
@@ -20,8 +42,11 @@ export function HomePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [goals, setGoals] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [status, setStatus] = useState<"idle" | "unverified" | "sending" | "sent" | "failed">("idle");
   const sentHeading = useRef<HTMLHeadingElement>(null);
+  const turnstileBox = useRef<HTMLDivElement>(null);
+  const turnstileWidget = useRef<{ api: Turnstile; id: string } | null>(null);
+  const formShown = status !== "sent";
 
   const startRequest = (selection: { course?: Course; tutor?: TutorKey } = {}) => {
     flushSync(() => {
@@ -42,6 +67,19 @@ export function HomePage() {
     setTutor(tutorFromKey(params.get("tutor")));
   }, []);
   useEffect(() => { if (status === "sent") sentHeading.current?.focus(); }, [status]);
+  useEffect(() => {
+    const box = turnstileBox.current;
+    if (!turnstileSiteKey || !formShown || !box) return;
+    let cancelled = false;
+    loadTurnstile().then(api => {
+      if (!cancelled) turnstileWidget.current = { api, id: api.render(box, { sitekey: turnstileSiteKey, theme: "light", size: "flexible" }) };
+    }).catch(() => { /* Without the widget there is no token, and the form offers the email fallback. */ });
+    return () => {
+      cancelled = true;
+      if (turnstileWidget.current) turnstileWidget.current.api.remove(turnstileWidget.current.id);
+      turnstileWidget.current = null;
+    };
+  }, [formShown]);
   useEffect(() => {
     type Tool = { name: string; title: string; description: string; inputSchema: object; annotations: object; execute: (input: unknown) => object };
     const context = (document as Document & { modelContext?: { registerTool: (tool: Tool, options?: { signal: AbortSignal }) => void | Promise<void> } }).modelContext;
@@ -70,16 +108,23 @@ export function HomePage() {
 
   const details = { name: name.trim(), email: email.trim(), course, tutor, goals: goals.trim() };
 
-  // functions/api/request-session.ts emails the request through MailerSend.
+  // functions/api/request-session.ts checks the spam fields and emails the request through MailerSend.
   async function sendRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!details.name || !details.email || !details.goals || status === "sending") return;
+    const fields = new FormData(event.currentTarget);
+    const turnstileToken = fields.get("cf-turnstile-response");
+    if (turnstileSiteKey && !turnstileToken) { setStatus("unverified"); return; }
     setStatus("sending");
     try {
-      const response = await fetch("/api/request-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(details) });
-      setStatus(response.ok ? "sent" : "failed");
-    } catch { setStatus("failed"); }
+      const response = await fetch("/api/request-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...details, website: fields.get("website"), turnstileToken }) });
+      if (response.ok) { setStatus("sent"); return; }
+    } catch { /* Reported below. */ }
+    setStatus("failed");
+    // Each Turnstile token works once, so a retry needs a fresh one.
+    if (turnstileWidget.current) turnstileWidget.current.api.reset(turnstileWidget.current.id);
   }
+  const emailInstead = <a className="inline-link" href={createEmailDraft(details).href}>email it to us instead</a>;
 
   return <>
     <SiteHeader />
@@ -203,10 +248,16 @@ export function HomePage() {
                 <textarea id="request-goals" maxLength={1500} rows={5} placeholder="Your topics, upcoming exams, times that suit you, and whether you’d prefer online or in person." value={goals} onChange={e => setGoals(e.target.value)} required />
                 <p className="form-note">A few sentences is plenty.</p>
               </div>
+              <div className="trap" aria-hidden="true">
+                <label htmlFor="request-website">Leave this empty</label>
+                <input id="request-website" name="website" tabIndex={-1} autoComplete="off" />
+              </div>
+              {turnstileSiteKey && <div className="turnstile" ref={turnstileBox} />}
               <div className="actions">
                 <button type="submit" className="button" disabled={status === "sending"}>{status === "sending" ? "Sending…" : "Send request"}</button>
                 <p className="form-note" role="status" aria-live="polite">
-                  {status === "failed" && <>Your request didn’t go through. Try again, or <a className="inline-link" href={createEmailDraft(details).href}>email it to us instead</a>.</>}
+                  {status === "failed" && <>Your request didn’t go through. Try again, or {emailInstead}.</>}
+                  {status === "unverified" && <>The spam check hasn’t finished. Wait a moment and send again, or {emailInstead}.</>}
                 </p>
               </div>
             </form>

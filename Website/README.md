@@ -13,7 +13,7 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 3. List the three courses and the topics students can bring.
 4. Answer practical questions without inventing rates, credentials, testimonials, or availability.
 5. Offer the request form at the foot of the home page. Course links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
-6. Validate required details and email the request to Gavin through MailerSend. If sending fails, offer a prefilled email the visitor can send from their own email app instead.
+6. Validate required details, screen out bots, and email the request to Gavin through MailerSend. If sending fails, offer a prefilled email the visitor can send from their own email app instead.
 7. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
 8. Offer Felix’s substitution and elimination study game at `/game`. The game is one self-contained file, `public/games/organic-exam-two.html`, embedded in the page; replace that file to update the game.
 
@@ -26,7 +26,15 @@ The request form needs two variables under the Pages project's **Settings → Va
 - `MAILERSEND_API_KEY` (type **Secret**): a MailerSend API token with permission to send email.
 - `MAILERSEND_FROM_EMAIL` (type **Text**): the sender address, on a domain verified in MailerSend. With a MailerSend trial domain, MailerSend only delivers to the account's own address.
 
-Never commit the token. To exercise the function locally, put both values in `Website/.dev.vars` (ignored by git), run `npm run build`, then `npx wrangler pages dev dist/client`.
+Bot protection has two layers. A hidden “website” field catches bots that fill in every field: the function answers them as if the request went through and sends nothing. Cloudflare Turnstile catches the rest, once it is set up:
+
+1. In the Cloudflare dashboard, open **Turnstile**, add a widget for the site’s hostname (`tutoring-9f8.pages.dev`, plus any custom domain) in **Managed** mode, and copy its site key and secret key.
+2. Under the Pages project’s **Settings → Variables and Secrets**, add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (type **Text**, the site key) and `TURNSTILE_SECRET_KEY` (type **Secret**, the secret key).
+3. Redeploy. The site key is built into the page, so it only appears after a new build.
+
+Set both or neither. Without the secret key the function skips Turnstile and logs a warning; with the secret key but no site key, the form has no widget and every request is refused.
+
+Never commit the tokens. To exercise the function locally, put the values in `Website/.dev.vars` (ignored by git), run `npm run build`, then `npx wrangler pages dev dist/client`. Cloudflare publishes Turnstile test keys that always pass, for local use.
 
 ## Search engines
 
@@ -69,3 +77,5 @@ When supported, `start_tutoring_request` scrolls to the same visible request for
 After the redesign: TypeScript, lint, and a production build pass. Browser checks at 1440 px and 390 px cover both pages, course and tutor preselection (buttons and `?course=` links), email draft content and recipient routing, mobile navigation, and page width. The browser agent tool was not re-exercised after the redesign.
 
 After the switch to MailerSend: TypeScript, lint, and a production build pass, and `wrangler pages functions build` compiles the function. Under `wrangler pages dev`, malformed and incomplete requests get a 400, and the form shows the failure message with the email fallback. With MailerSend stubbed, the function sends the expected JSON (HTML-escaped visitor text, visitor as reply-to) and maps a refusal to a 502 and missing variables to a 500. The form’s sending, sent and “Send another request” states were checked in a browser at 1440 px and 390 px. No email has been sent through the real MailerSend API.
+
+After adding bot protection: TypeScript, lint and builds with and without a site key pass. With Turnstile and MailerSend stubbed, the function sends Turnstile the token, secret and visitor IP, refuses a missing, empty or rejected token (or an unreachable Turnstile) with a 403, answers a filled honeypot with a 200 without contacting either service, and skips Turnstile when no secret is set. In a browser, with Cloudflare’s test site key and a stand-in for Turnstile’s script, the widget renders once and is replaced after “Send another request”. A failed send resets it so a retry uses a fresh token. Sending before a token arrives shows a wait message and sends nothing. The honeypot is off-screen, untabbable and hidden from screen readers. The real Turnstile widget has not been loaded or verified, because this environment cannot reach Cloudflare’s Turnstile servers.
