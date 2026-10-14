@@ -13,13 +13,20 @@ Requires Node 22.13 or newer. Run `npm install`, then `npm run dev`. Use the loc
 3. List the three courses and the topics students can bring.
 4. Answer practical questions without inventing rates, credentials, testimonials, or availability.
 5. Offer the request form at the foot of the home page. Course links preselect it, as do links such as `/?course=organic&tutor=felix#request`.
-6. Validate required details, prepare a reviewable email, and let the visitor open an email app or copy the draft for webmail.
+6. Validate required details and email the request to Gavin through MailerSend. If sending fails, offer a prefilled email the visitor can send from their own email app instead.
 7. Keep the worked chemistry problems on a separate page, `/examples`, so the home page stays about the people and the service.
 8. Offer Felix’s substitution and elimination study game at `/game`. The game is one self-contained file, `public/games/organic-exam-two.html`, embedded in the page; replace that file to update the game.
 
 ## Deploying to Cloudflare Pages
 
-Pages settings: root directory `Website`, build command `npm run build`, build output directory `dist/client`. The pages are static, so `?course=` and `?tutor=` preselection is read in the browser. Links are plain `<a>` elements because vinext’s `<Link>` client navigation throws in the pinned beta.
+Pages settings: root directory `Website`, build command `npm run build`, build output directory `dist/client`. The pages are static, so `?course=` and `?tutor=` preselection is read in the browser. Links are plain `<a>` elements because vinext’s `<Link>` client navigation throws in the pinned beta. The one dynamic piece is the Pages Function in `functions/api/request-session.ts`, which Cloudflare deploys alongside the static files.
+
+The request form needs two variables under the Pages project's **Settings → Variables and Secrets**, for Production (and Preview, if preview deployments should send email too). Redeploy after adding or changing them.
+
+- `MAILERSEND_API_KEY` (type **Secret**): a MailerSend API token with permission to send email.
+- `MAILERSEND_FROM_EMAIL` (type **Text**): the sender address, on a domain verified in MailerSend. With a MailerSend trial domain, MailerSend only delivers to the account's own address.
+
+Never commit the token. To exercise the function locally, put both values in `Website/.dev.vars` (ignored by git), run `npm run build`, then `npx wrangler pages dev dist/client`.
 
 ## Search engines
 
@@ -30,7 +37,8 @@ Pages settings: root directory `Website`, build command `npm run build`, build o
 
 ## Editing business details
 
-- `lib/tutoring.ts`: placeholder company name, tutor contact details, course descriptions, FAQ, and email draft generation.
+- `lib/tutoring.ts`: placeholder company name, tutor contact details, the inbox that receives requests (`requestInbox`), course descriptions, FAQ, and the fallback email draft.
+- `functions/api/request-session.ts`: validates a request and sends it through MailerSend.
 - `app/layout.tsx`: browser title, search description, favicon.
 - `app/page.tsx` and `components/home-page.tsx`: home page structure and the request form.
 - `app/examples/page.tsx` and `components/reaction-schemes.tsx`: the worked examples and their hand-placed structure drawings. Check the chemistry whenever a problem is changed.
@@ -38,11 +46,11 @@ Pages settings: root directory `Website`, build command `npm run build`, build o
 - `app/globals.css`: palette, typography, responsive layout, and components.
 - `public/favicon.svg`: original simple brand icon.
 
-The two contact addresses supplied by the owner are `glb001@uark.edu` and `fcampbell@uark.edu`. Selecting either tutor sends the draft to that person; selecting “Either tutor” addresses both. The site never sends messages automatically and never reports that a request has been submitted or a session booked. All form details stay in browser memory until a visitor deliberately opens their email app or copies the text. Refreshing clears the fields. The website does not store inquiries or need a database. Rates, payment processing, exact availability, and booking-calendar integration remain business decisions, with no invented prices or calendar slots.
+The two contact addresses supplied by the owner are `glb001@uark.edu` and `fcampbell@uark.edu`. Every request from the form goes to `glb001@uark.edu`, whichever tutor is chosen; the email names the chosen tutor and uses the visitor’s address as reply-to, so replying answers the visitor directly. The confirmation says only that the request was sent, never that a session is booked. If sending fails, the fallback email goes to the chosen tutor, or to both for “Either tutor”. The website does not store inquiries or need a database. Rates, payment processing, exact availability, and booking-calendar integration remain business decisions, with no invented prices or calendar slots.
 
 ## Design
 
-A printed problem set: white paper, black ink, one ballpoint blue (`--pen`) for the tutor’s working, and highlighter yellow (`--highlight`) for the key idea and the request form. Libre Franklin carries the site’s own voice; STIX Two Text is used only inside the problems and the “pen” annotations. Section titles sit in a margin column with ruled lines between sections rather than cards. Real tutor names and no fabricated tutor photographs. Light theme intentionally fixed; reduced-motion preferences supported. The site includes mobile navigation, native radio buttons and labeled fields, clear draft status, fallback copy, and a skip link.
+A printed problem set: white paper, black ink, one ballpoint blue (`--pen`) for the tutor’s working, and highlighter yellow (`--highlight`) for the key idea and the request form. Libre Franklin carries the site’s own voice; STIX Two Text is used only inside the problems and the “pen” annotations. Section titles sit in a margin column with ruled lines between sections rather than cards. Real tutor names and no fabricated tutor photographs. Light theme intentionally fixed; reduced-motion preferences supported. The site includes mobile navigation, native radio buttons and labeled fields, clear sending status, an email fallback, and a skip link.
 
 ## Retired hero asset
 
@@ -54,8 +62,10 @@ Exact generation prompt:
 
 ## Optional browser agent support
 
-When supported, `start_tutoring_request` scrolls to the same visible request form after validating its course and tutor options. It only stages the request and cannot send email. Browsers without WebMCP use the complete ordinary interface.
+When supported, `start_tutoring_request` scrolls to the same visible request form after validating its course and tutor options. It only opens the form and cannot fill it in or send it. Browsers without WebMCP use the complete ordinary interface.
 
 ## Verification
 
-After the redesign: TypeScript, lint, and a production build pass. Browser checks at 1440 px and 390 px cover both pages, course and tutor preselection (buttons and `?course=` links), email draft content and recipient routing, mobile navigation, and page width. The webmail copy button and the browser agent tool were not re-exercised after the redesign. No test inquiry was sent.
+After the redesign: TypeScript, lint, and a production build pass. Browser checks at 1440 px and 390 px cover both pages, course and tutor preselection (buttons and `?course=` links), email draft content and recipient routing, mobile navigation, and page width. The browser agent tool was not re-exercised after the redesign.
+
+After the switch to MailerSend: TypeScript, lint, and a production build pass, and `wrangler pages functions build` compiles the function. Under `wrangler pages dev`, malformed and incomplete requests get a 400, and the form shows the failure message with the email fallback. With MailerSend stubbed, the function sends the expected JSON (HTML-escaped visitor text, visitor as reply-to) and maps a refusal to a 502 and missing variables to a 500. The form’s sending, sent and “Send another request” states were checked in a browser at 1440 px and 390 px. No email has been sent through the real MailerSend API.

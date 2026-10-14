@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { flushSync } from "react-dom";
-import { Copy, Mail } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { company, courseOptions, subjects, tutors, tutorOptions, faqs, createEmailDraft, courseFromSlug, tutorFromKey, type Course, type TutorKey } from "@/lib/tutoring";
@@ -21,15 +20,14 @@ export function HomePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [goals, setGoals] = useState("");
-  const [draft, setDraft] = useState<ReturnType<typeof createEmailDraft> | null>(null);
-  const [copyStatus, setCopyStatus] = useState("");
-  const draftHeading = useRef<HTMLHeadingElement>(null);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const sentHeading = useRef<HTMLHeadingElement>(null);
 
   const startRequest = (selection: { course?: Course; tutor?: TutorKey } = {}) => {
     flushSync(() => {
       if (selection.course) setCourse(selection.course);
       if (selection.tutor) setTutor(selection.tutor);
-      setDraft(null); setCopyStatus("");
+      setStatus(current => current === "sending" ? current : "idle");
     });
     document.getElementById("request")?.scrollIntoView();
     document.getElementById("request-name")?.focus({ preventScroll: true });
@@ -43,7 +41,7 @@ export function HomePage() {
     setCourse(courseFromSlug(params.get("course")));
     setTutor(tutorFromKey(params.get("tutor")));
   }, []);
-  useEffect(() => { if (draft) draftHeading.current?.focus(); }, [draft]);
+  useEffect(() => { if (status === "sent") sentHeading.current?.focus(); }, [status]);
   useEffect(() => {
     type Tool = { name: string; title: string; description: string; inputSchema: object; annotations: object; execute: (input: unknown) => object };
     const context = (document as Document & { modelContext?: { registerTool: (tool: Tool, options?: { signal: AbortSignal }) => void | Promise<void> } }).modelContext;
@@ -52,7 +50,7 @@ export function HomePage() {
     try {
       void Promise.resolve(context.registerTool({
         name: "start_tutoring_request", title: "Start a tutoring request",
-        description: "Scroll to the visible session-request form, optionally preselecting a chemistry course and tutor. This only prepares a draft; it does not send email or book a session.",
+        description: "Scroll to the visible session-request form, optionally preselecting a chemistry course and tutor. It does not fill in or send the form, and it does not book a session.",
         inputSchema: { type: "object", properties: { course: { type: "string", enum: courseOptions }, tutor: { type: "string", enum: tutorOptions } }, additionalProperties: false },
         annotations: { readOnlyHint: false, untrustedContentHint: false },
         execute(input: unknown) {
@@ -63,23 +61,24 @@ export function HomePage() {
           const selectedTutor = data.tutor ?? "either";
           if (!courseOptions.includes(selectedCourse as Course) || !tutorOptions.includes(selectedTutor as TutorKey)) throw new Error("Choose a listed chemistry course and tutor.");
           startRequest({ course: selectedCourse as Course, tutor: selectedTutor as TutorKey });
-          return { status: "draft_open", course: selectedCourse, tutor: selectedTutor, sent: false };
+          return { status: "form_open", course: selectedCourse, tutor: selectedTutor, sent: false };
         },
       }, { signal: lifecycle.signal })).catch(() => {});
     } catch { /* Browsers without WebMCP retain the complete visible flow. */ }
     return () => lifecycle.abort();
   }, []);
 
-  function prepareRequest(event: FormEvent<HTMLFormElement>) {
+  const details = { name: name.trim(), email: email.trim(), course, tutor, goals: goals.trim() };
+
+  // functions/api/request-session.ts emails the request through MailerSend.
+  async function sendRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim() || !email.trim() || !goals.trim()) return;
-    setDraft(createEmailDraft({ name: name.trim(), email: email.trim(), course, tutor, goals: goals.trim() }));
-    setCopyStatus("");
-  }
-  async function copyRequest() {
-    if (!draft) return;
-    try { await navigator.clipboard.writeText(`To: ${draft.to}\nSubject: ${draft.subject}\n\n${draft.body}`); setCopyStatus("Copied. Paste this into your email app and send when you’re ready."); }
-    catch { setCopyStatus("Copy isn’t available in this browser. Select and copy the request below."); }
+    if (!details.name || !details.email || !details.goals || status === "sending") return;
+    setStatus("sending");
+    try {
+      const response = await fetch("/api/request-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(details) });
+      setStatus(response.ok ? "sent" : "failed");
+    } catch { setStatus("failed"); }
   }
 
   return <>
@@ -163,10 +162,10 @@ export function HomePage() {
         <div className="shell section-inner">
           <div className="section-head">
             <h2 id="request-heading">Request a session</h2>
-            <p>Nothing is sent from this page. The form writes an email for you to review and send from your own email app. Your tutor replies to confirm rates, timing and format.</p>
+            <p>Send us a few details and your request comes straight to our inbox. Your tutor replies by email to confirm rates, timing and format.</p>
           </div>
-          {!draft ? (
-            <form className="section-body request-form" onSubmit={prepareRequest}>
+          {status !== "sent" ? (
+            <form className="section-body request-form" onSubmit={sendRequest}>
               <div className="field-row">
                 <div className="field">
                   <label htmlFor="request-name">Your name</label>
@@ -205,27 +204,19 @@ export function HomePage() {
                 <p className="form-note">A few sentences is plenty.</p>
               </div>
               <div className="actions">
-                <button type="submit" className="button">Prepare my email</button>
-                <p className="form-note">Your details stay on this page until you choose to send them.</p>
+                <button type="submit" className="button" disabled={status === "sending"}>{status === "sending" ? "Sending…" : "Send request"}</button>
+                <p className="form-note" role="status" aria-live="polite">
+                  {status === "failed" && <>Your request didn’t go through. Try again, or <a className="inline-link" href={createEmailDraft(details).href}>email it to us instead</a>.</>}
+                </p>
               </div>
             </form>
           ) : (
-            <div className="section-body draft">
-              <h3 ref={draftHeading} tabIndex={-1}>Your email is ready to review</h3>
-              <div className="sheet">
-                <p className="sheet-head"><span>Email draft</span><span>Nothing has been sent or booked yet</span></p>
-                <dl className="glance">
-                  <div><dt>To</dt><dd>{draft.to}</dd></div>
-                  <div><dt>Subject</dt><dd>{draft.subject}</dd></div>
-                </dl>
-                <textarea aria-label="Your email request draft" className="draft-body" value={draft.body} readOnly rows={12} />
-              </div>
+            <div className="section-body request-sent">
+              <h3 ref={sentHeading} tabIndex={-1}>Thanks, {details.name}. Your request has been sent.</h3>
+              <p>Your tutor will reply to {details.email} to confirm rates, timing and format.</p>
               <div className="actions">
-                <a className="button" href={draft.href}><Mail size={18} aria-hidden="true" />Open email app</a>
-                <button type="button" className="text-link" onClick={copyRequest}><Copy size={15} aria-hidden="true" />Copy email request</button>
-                <button type="button" className="text-link" onClick={() => { setDraft(null); setCopyStatus(""); }}>Edit details</button>
+                <button type="button" className="text-link" onClick={() => { setGoals(""); setStatus("idle"); }}>Send another request</button>
               </div>
-              <p className="form-note" role="status" aria-live="polite">{copyStatus || "No email app configured? Copy the request and send it using your webmail."}</p>
             </div>
           )}
         </div>

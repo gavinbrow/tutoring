@@ -13,14 +13,16 @@ export const tutors = [
   { key: "gavin" as const, name: "Gavin Brown", firstName: "Gavin", email: "glb001@uark.edu", photo: "/images/gavin-brown.jpg" as string | null },
   { key: "felix" as const, name: "Felix Campbell", firstName: "Felix", email: "fcampbell@uark.edu", photo: "/images/felix-campbell.jpg" as string | null },
 ];
+/** The request form emails every request here, whichever tutor the visitor picks. */
+export const requestInbox = "glb001@uark.edu";
 export const courseOptions: Course[] = [...subjects.map(subject => subject.name), "Not sure yet"];
 export const tutorOptions: TutorKey[] = ["either", ...tutors.map(tutor => tutor.key)];
 export const faqs = [
   { question: "Which chemistry courses can you help with?", answer: "High school chemistry, AP Chemistry, college General Chemistry I and II, and Organic Chemistry I and II. Send us your course name and the topics you’re working on so we can confirm the fit." },
-  { question: "How do I arrange a session?", answer: "Fill in the request form below with your course, goals and preferred times. It prepares an email to Gavin, Felix, or both. Send it from your email app and your tutor will confirm the details with you directly." },
+  { question: "How do I arrange a session?", answer: "Fill in the request form below with your course, goals and preferred times, then send it. Your tutor will reply by email to confirm the details with you directly." },
   { question: "What are your rates?", answer: "Your tutor will confirm the rate and session length with you before you book. Include your course and what you’d like to work on so we can discuss the right approach." },
   { question: "Are sessions online or in person?", answer: "Tell us which you’d prefer when you get in touch. We’ll confirm the format, timing and any location with you before booking." },
-  { question: "Do I need to choose a tutor first?", answer: "No. Choose “Either tutor” on the form and your email will be addressed to both Gavin and Felix. You can also contact either of us directly. Students and parents are both welcome to get in touch." },
+  { question: "Do I need to choose a tutor first?", answer: "No. Choose “Either tutor” on the form and we’ll work out who’s the best fit. You can also contact either of us directly. Students and parents are both welcome to get in touch." },
 ];
 /** Links such as /?course=organic#request preselect the request form. */
 export function courseFromSlug(slug: unknown): Course {
